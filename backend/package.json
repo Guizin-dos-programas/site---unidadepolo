@@ -1,0 +1,26 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "lockfileVersion": 3,
+  "requires": true,
+  "author": "Colégio Unidade Polo",
+  "description": "Backend para site do Colégio Unidade Polo",
+  "keywords": [
+    "colégio",
+    "api",
+    "upload",
+    "gallery"
+  ],
+  "license": "MIT",
+  "main": "server.js",
+  "packages": {},
+  "scripts": {
+    "dev": "nodemon server.js",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "multer": "^2.0.2"
+  }
+}
