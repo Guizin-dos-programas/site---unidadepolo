@@ -1,5 +1,5 @@
 // Configuração
-const API_BASE = 'https://site-unidadepolo-production.up.railway.app';
+const API_BASE = 'https://site-unidadepolo-production.up.railway.app/api';
 let authHeader = '';
 
 // ===== FUNÇÕES PRINCIPAIS =====
