@@ -1,5 +1,5 @@
 // Configuração
-const API_BASE = 'http://localhost:3000/api';
+const API_BASE = 'https://site-unidadepolo.up.railway.app/api';
 let authHeader = '';
 
 // ===== FUNÇÕES PRINCIPAIS =====
