@@ -8,7 +8,14 @@ const app = express();
 const PORT = 3000;
 
 // ===== MIDDLEWARE =====
-app.use(cors());
+app.use(cors({
+    origin: [
+        'https://colegiounidadepolo.netlify.app',
+        'http://localhost:5500',
+        'http://127.0.0.1:5500'
+    ],
+    credentials: true
+}));
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
