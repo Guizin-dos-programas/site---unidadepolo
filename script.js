@@ -1,5 +1,12 @@
 // Configuração
-const API_BASE = 'https://site-unidadepolo-production.up.railway.app/api';
+const getApiBase = () => {
+  if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    return 'https://site-unidadepolo-production-6f6c.up.railway.app/api';
+  }
+  return 'http://localhost:3000/api';
+};
+
+const API_BASE = getApiBase();
 let authHeader = '';
 
 // ===== FUNÇÕES PRINCIPAIS =====
@@ -12,20 +19,22 @@ async function carregarGaleriaSite() {
 
         if (data.success) {
             const galeriaPrincipal = document.querySelector('.galeria-grid');
-            galeriaPrincipal.innerHTML = '';
+            if (galeriaPrincipal) {
+                galeriaPrincipal.innerHTML = '';
 
-            data.images.forEach(imagem => {
-                const item = document.createElement('div');
-                item.className = 'galeria-item';
-                
-                const img = document.createElement('img');
-                img.src = `http://localhost:3000${imagem.url}`;
-                img.alt = imagem.originalName;
-                img.loading = 'lazy';
-                
-                item.appendChild(img);
-                galeriaPrincipal.appendChild(item);
-            });
+                data.images.forEach(imagem => {
+                    const item = document.createElement('div');
+                    item.className = 'galeria-item';
+                    
+                    const img = document.createElement('img');
+                    img.src = `${API_BASE.replace('/api', '')}${imagem.url}`;
+                    img.alt = imagem.originalName;
+                    img.loading = 'lazy';
+                    
+                    item.appendChild(img);
+                    galeriaPrincipal.appendChild(item);
+                });
+            }
         }
     } catch (error) {
         console.log('Erro ao carregar galeria:', error);
@@ -83,14 +92,14 @@ async function fazerUpload(file) {
 // ===== EVENTOS E INICIALIZAÇÃO =====
 
 // Menu Mobile
-document.querySelector('.mobile-menu').addEventListener('click', function() {
-    document.querySelector('nav ul').classList.toggle('active');
+document.querySelector('.mobile-menu')?.addEventListener('click', function() {
+    document.querySelector('nav ul')?.classList.toggle('active');
 });
 
 // Fechar menu mobile
 document.querySelectorAll('nav ul li a').forEach(link => {
     link.addEventListener('click', function() {
-        document.querySelector('nav ul').classList.remove('active');
+        document.querySelector('nav ul')?.classList.remove('active');
     });
 });
 
@@ -122,24 +131,24 @@ const adminPanel = document.getElementById('adminPanel');
 const logoutBtn = document.getElementById('logoutBtn');
 
 // Abrir modal de login
-adminBtn.addEventListener('click', function() {
-    loginForm.reset();
-    loginModal.style.display = 'flex';
+adminBtn?.addEventListener('click', function() {
+    loginForm?.reset();
+    if (loginModal) loginModal.style.display = 'flex';
 });
 
 // Fechar modal
-closeModal.addEventListener('click', function() {
-    loginModal.style.display = 'none';
+closeModal?.addEventListener('click', function() {
+    if (loginModal) loginModal.style.display = 'none';
 });
 
-loginModal.addEventListener('click', function(e) {
+loginModal?.addEventListener('click', function(e) {
     if(e.target === loginModal) {
         loginModal.style.display = 'none';
     }
 });
 
 // Login
-loginForm.addEventListener('submit', async function(e) {
+loginForm?.addEventListener('submit', async function(e) {
     e.preventDefault();
     
     const username = document.getElementById('username').value;
@@ -160,8 +169,8 @@ loginForm.addEventListener('submit', async function(e) {
             // Salvar credenciais
             authHeader = 'Basic ' + btoa(username + ':' + password);
             
-            loginModal.style.display = 'none';
-            adminPanel.style.display = 'block';
+            if (loginModal) loginModal.style.display = 'none';
+            if (adminPanel) adminPanel.style.display = 'block';
             document.body.style.overflow = 'hidden';
             
             // Carregar dados atuais
@@ -176,11 +185,11 @@ loginForm.addEventListener('submit', async function(e) {
 });
 
 // Logout
-logoutBtn.addEventListener('click', function() {
-    adminPanel.style.display = 'none';
+logoutBtn?.addEventListener('click', function() {
+    if (adminPanel) adminPanel.style.display = 'none';
     document.body.style.overflow = 'auto';
     authHeader = '';
-    loginForm.reset();
+    loginForm?.reset();
 });
 
 // Carregar dados no painel admin
@@ -196,19 +205,21 @@ async function carregarGaleriaAdmin() {
 
         if (data.success) {
             const imagePreview = document.getElementById('imagePreview');
-            imagePreview.innerHTML = '';
+            if (imagePreview) {
+                imagePreview.innerHTML = '';
 
-            data.images.forEach(imagem => {
-                adicionarImagemPreview(imagem);
-            });
+                data.images.forEach(imagem => {
+                    adicionarImagemPreview(imagem);
+                });
+            }
         }
     } catch (error) {
         console.log('Erro ao carregar galeria admin:', error);
     }
 }
+
 // ===== FUNÇÕES PARA CAMPEONATOS =====
 
-// Carregar campeonatos no painel admin (com botões de delete)
 // Carregar campeonatos no painel admin (com event listeners)
 async function carregarCampeonatosAdmin() {
     try {
@@ -279,8 +290,9 @@ async function deletarCampeonato(id) {
         alert('❌ Erro ao deletar campeonato');
     }
 }
+
 // Formulário de Campeonatos
-document.getElementById('campeonatoForm').addEventListener('submit', async function(e) {
+document.getElementById('campeonatoForm')?.addEventListener('submit', async function(e) {
     e.preventDefault();
     
     const titulo = document.getElementById('titulo').value;
@@ -311,10 +323,11 @@ document.getElementById('campeonatoForm').addEventListener('submit', async funct
     submitBtn.disabled = false;
     
     if (success) {
-        // Opcional: atualizar a lista de campeonatos no site
-        // await carregarCampeonatosSite();
+        // Atualizar a lista
+        await carregarCampeonatosAdmin();
     }
 });
+
 // Upload de campeonato
 async function fazerUploadCampeonato(formData) {
     try {
@@ -341,6 +354,7 @@ async function fazerUploadCampeonato(formData) {
         return false;
     }
 }
+
 // Carregar campeonatos no site principal
 async function carregarCampeonatosSite() {
     try {
@@ -349,49 +363,44 @@ async function carregarCampeonatosSite() {
 
         if (data.success && data.championships.length > 0) {
             const campeonatosGrid = document.querySelector('.campeonatos-grid');
-            campeonatosGrid.innerHTML = '';
+            if (campeonatosGrid) {
+                campeonatosGrid.innerHTML = '';
 
-            data.championships.forEach(campeonato => {
-                const card = document.createElement('div');
-                card.className = 'campeonato-card';
-                
-                card.innerHTML = `
-                    <div class="campeonato-img">
-                        <img src="http://localhost:3000${campeonato.image || '/uploads/default-campeonato.jpg'}" alt="${campeonato.title}">
-                    </div>
-                    <div class="campeonato-info">
-                        <h3>${campeonato.title}</h3>
-                        <p>${campeonato.description}</p>
-                        <span class="status-badge status-active">${campeonato.year}</span>
-                    </div>
-                `;
-                
-                campeonatosGrid.appendChild(card);
-            });
+                data.championships.forEach(campeonato => {
+                    const card = document.createElement('div');
+                    card.className = 'campeonato-card';
+                    
+                    card.innerHTML = `
+                        <div class="campeonato-img">
+                            <img src="${API_BASE.replace('/api', '')}${campeonato.image || '/uploads/default-campeonato.jpg'}" alt="${campeonato.title}">
+                        </div>
+                        <div class="campeonato-info">
+                            <h3>${campeonato.title}</h3>
+                            <p>${campeonato.description}</p>
+                            <span class="status-badge status-active">${campeonato.year}</span>
+                        </div>
+                    `;
+                    
+                    campeonatosGrid.appendChild(card);
+                });
+            }
         }
     } catch (error) {
         console.log('Erro ao carregar campeonatos:', error);
     }
 }
 
-// Atualizar a inicialização para carregar campeonatos também
-document.addEventListener('DOMContentLoaded', function() {
-    carregarGaleriaSite();
-    carregarCampeonatosSite(); // ← ADICIONE ESTA LINHA
-});
-// Atualizar a função carregarDadosAdmin para incluir campeonatos
-async function carregarDadosAdmin() {
-    await carregarGaleriaAdmin();
-    await carregarCampeonatosAdmin();
-}
 // Adicionar imagem ao preview do admin
 function adicionarImagemPreview(imagem) {
+    const imagePreview = document.getElementById('imagePreview');
+    if (!imagePreview) return;
+    
     const previewItem = document.createElement('div');
     previewItem.className = 'preview-item';
     previewItem.dataset.id = imagem.id;
     
     const img = document.createElement('img');
-    img.src = `http://localhost:3000${imagem.url}`;
+    img.src = `${API_BASE.replace('/api', '')}${imagem.url}`;
     img.alt = imagem.originalName;
     
     const previewActions = document.createElement('div');
@@ -406,7 +415,7 @@ function adicionarImagemPreview(imagem) {
     previewItem.appendChild(img);
     previewItem.appendChild(previewActions);
     
-    document.getElementById('imagePreview').appendChild(previewItem);
+    imagePreview.appendChild(previewItem);
 }
 
 // Deletar imagem
@@ -425,7 +434,8 @@ async function deletarImagem(id) {
         
         if (data.success) {
             // Remover do preview
-            document.querySelector(`.preview-item[data-id="${id}"]`).remove();
+            const previewItem = document.querySelector(`.preview-item[data-id="${id}"]`);
+            if (previewItem) previewItem.remove();
             
             // Atualizar site
             await carregarGaleriaSite();
@@ -452,23 +462,23 @@ const uploadArea = document.getElementById('uploadArea');
 const fileInput = document.getElementById('fileInput');
 
 // Clique na área de upload
-uploadArea.addEventListener('click', function() {
-    fileInput.click();
+uploadArea?.addEventListener('click', function() {
+    fileInput?.click();
 });
 
 // Arrastar e soltar
-uploadArea.addEventListener('dragover', function(e) {
+uploadArea?.addEventListener('dragover', function(e) {
     e.preventDefault();
     this.style.borderColor = 'var(--azul)';
     this.style.backgroundColor = 'rgba(43, 79, 129, 0.05)';
 });
 
-uploadArea.addEventListener('dragleave', function() {
+uploadArea?.addEventListener('dragleave', function() {
     this.style.borderColor = '#dee2e6';
     this.style.backgroundColor = 'var(--cinza)';
 });
 
-uploadArea.addEventListener('drop', function(e) {
+uploadArea?.addEventListener('drop', function(e) {
     e.preventDefault();
     this.style.borderColor = '#dee2e6';
     this.style.backgroundColor = 'var(--cinza)';
@@ -478,7 +488,7 @@ uploadArea.addEventListener('drop', function(e) {
 });
 
 // Seleção de arquivos
-fileInput.addEventListener('change', function() {
+fileInput?.addEventListener('change', function() {
     processarArquivos(this.files);
 });
 
@@ -494,13 +504,13 @@ async function processarArquivos(files) {
     }
     
     // Limpar input
-    fileInput.value = '';
+    if (fileInput) fileInput.value = '';
 }
 
 // ===== FORMULÁRIO DE CONTATO =====
 
 // 📧 FORMULÁRIO DE CONTATO (REDIRECIONA PARA GMAIL)
-document.getElementById('form-contato').addEventListener('submit', function(e) {
+document.getElementById('form-contato')?.addEventListener('submit', function(e) {
     e.preventDefault();
     console.log('✅ Formulário de contato submetido!');
     
@@ -560,6 +570,7 @@ Enviado através do site do colégio.
 document.addEventListener('DOMContentLoaded', function() {
     // Carregar galeria do site
     carregarGaleriaSite();
+    carregarCampeonatosSite();
     
     // Configurar tabs do admin
     document.querySelectorAll('.admin-tab').forEach(tab => {
@@ -569,7 +580,8 @@ document.addEventListener('DOMContentLoaded', function() {
             
             this.classList.add('active');
             const tabId = this.getAttribute('data-tab');
-            document.getElementById(`${tabId}-tab`).classList.add('active');
+            const tabContent = document.getElementById(`${tabId}-tab`);
+            if (tabContent) tabContent.classList.add('active');
         });
     });
 });
