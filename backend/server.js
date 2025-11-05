@@ -5,10 +5,15 @@ const path = require('path');
 const fs = require('fs');
 
 const app = express();
-const PORT = 3000;
+
+// ✅ CORREÇÃO: Porta dinâmica para Railway
+const PORT = process.env.PORT || 3000;
 
 // ===== MIDDLEWARE =====
-app.use(cors());
+app.use(cors({
+  origin: ['https://colegiounidadepolo.netlify.app', 'http://localhost:3000'], // ✅ Adicione seu domínio Netlify
+  credentials: true
+}));
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
